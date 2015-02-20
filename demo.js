@@ -1,13 +1,3 @@
-# Port-client
-Port API client.
-
-The `node.js` client for the [port](https://github.com/MangoRaft/Port) API.
-
-## Usage
-
-Allows you to call haibu programmatically from inside your node.js scripts.
-
-```javascript
 var eyes = require('eyes'),
     port = require('./lib'),
     seaport = require('seaport');
@@ -93,5 +83,3 @@ ports.get('us-dev-test', function(ps) {
 
 	});
 });
-
-```

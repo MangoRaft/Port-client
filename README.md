@@ -5,7 +5,7 @@ The `node.js` client for the [port](https://github.com/MangoRaft/Port) API.
 
 ## Usage
 
-Allows you to call haibu programmatically from inside your node.js scripts.
+Allows you to call Port programmatically from inside your node.js scripts.
 
 ```javascript
 var eyes = require('eyes'),

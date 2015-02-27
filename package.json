@@ -1,6 +1,6 @@
 {
 	"name": "port-cli",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"keywords": ["REST", "server", "docker"],
 	"homepage": "https://github.com/MangoRaft/Port-client",
 	"author": "Tim <mangoraft@gmail.com>",

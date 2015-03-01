@@ -2,9 +2,42 @@ var eyes = require('eyes'),
     port = require('./lib'),
     seaport = require('seaport');
 
-var ports = seaport.connect('localhost', 9090);
-
-var redis = {
+var redis0 = {
+	"logs" : {
+		"web" : {
+			"port" : 80,
+			"host" : "..."
+		},
+		"udp" : {
+			"port" : 5000,
+			"host" : "127.0.0.1"
+		},
+		"view" : {
+			"port" : 5000,
+			"host" : "127.0.0.1"
+		}
+	},
+	"logSession" : "docker.test",
+	"name" : "docker.test",
+	"index" : 0,
+	"uid" : "uid",
+	"source" : "app",
+	"channel" : "redis.0",
+	"process" : "web",
+	"volumes" : {},
+	"env" : {
+		"hello" : "world"
+	},
+	"limits" : {
+		"memory" : 128,
+		"cpuShares" : 256,
+		"cpuset" : "0,1"
+	},
+	"image" : ".../test/test:27",
+	"ports" : ["8080/tcp"],
+	cmd : "herokuish procfile start web".split(' ')
+};
+var redis1 = {
 	"logs" : {
 		"web" : {
 			"port" : 80,
@@ -35,51 +68,60 @@ var redis = {
 		"cpuShares" : 256,
 		"cpuset" : "0,1"
 	},
-	"image" : "redis",
-	"ports" : ["6379/tcp"]
+	"image" : ".../test/test:27",
+	"ports" : ["8080/tcp"],
+	cmd : "herokuish procfile start wseb".split(' ')
 };
 
-ports.get('us-dev-test', function(ps) {
+// Create a new client for communicating with the port server
+var client = port.createClient({
+	host : '127.0.0.1',
+	port : 9090,
+	secret : '123abc'
+});
 
-	// Create a new client for communicating with the port server
-	var client = port.createClient({
-		host : ps[0].host,
-		port : ps[0].port,
-		secret : ps[0].secret
-	});
-	client.wait(function(err, result) {
+function loop() {
+	// Attempt to start up a new container
+	client.start(redis0, function(err, result) {
 		if (err) {
-			console.log('Error waiting for container: ' + redis.name);
-			return eyes.inspect(err);
+			console.log('Error spawning container: ' + redis0.name);
+			return console.log(err);
 		}
-		console.log('global wait');
-		eyes.inspect(result);
-		loop();
-	});
+		var id = result.container.id;
 
-	function loop() {
-		// Attempt to start up a new container
-		client.start(redis, function(err, result) {
+		console.log('Successfully spawned container:');
+		eyes.inspect(result);
+		client.stop(id, function(err, result) {
 			if (err) {
-				console.log('Error spawning container: ' + redis.name);
+				console.log('Error stopping for container: ' + redis0.name);
 				return eyes.inspect(err);
 			}
-			var id = result.container.id;
 
-			console.log('Successfully spawned container:');
+			console.log('stop container:');
 			eyes.inspect(result);
-			client.stop(id, function(err, result) {
-				if (err) {
-					console.log('Error stopping for container: ' + redis.name);
-					return eyes.inspect(err);
-				}
-
-				console.log('stop container:');
-				eyes.inspect(result);
-			});
-
 		});
-	}
 
-	loop();
-});
+	});
+	client.start(redis1, function(err, result) {
+		if (err) {
+			console.log('Error spawning container: ' + redis1.name);
+			return eyes.inspect(err);
+		}
+		var id = result.container.id;
+
+		console.log('Successfully spawned container:');
+		eyes.inspect(result);
+		client.stop(id, function(err, result) {
+			if (err) {
+				console.log('Error stopping for container: ' + redis1.name);
+				return eyes.inspect(err);
+			}
+
+			console.log('stop container:');
+			eyes.inspect(result);
+		});
+
+	});
+}
+
+loop();
